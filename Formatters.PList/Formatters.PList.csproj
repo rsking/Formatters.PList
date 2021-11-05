@@ -3,6 +3,11 @@
   <PropertyGroup>
     <TargetFrameworks>net6.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Authors>Ross King</Authors>
+    <Description>PList formatters based on IFormatter and IXmlSerializable</Description>
+    <PackageTags>PList;IFormatter;IXmlSerializable</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/rsking/Formatters.PList</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
