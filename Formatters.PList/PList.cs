@@ -201,22 +201,7 @@ public partial class PList : IDictionary<string, object>, IDictionary, IXmlSeria
     void ICollection.CopyTo(Array array, int index) => ((IDictionary)this.DictionaryImplementation).CopyTo(array, index);
 
     /// <inheritdoc />
-    public override string ToString()
-    {
-        using var writer = new Utf8StringWriter();
-        using var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings { Encoding = writer.Encoding });
-        xmlWriter.WriteDocType("plist", "-//Apple//DTD PLIST 1.0//EN", "http://www.apple.com/DTDs/PropertyList-1.0.dtd", subset: null);
-        Serializer.Serialize(xmlWriter, this);
-        return writer.ToString();
-    }
-
-    /// <inheritdoc />
     public System.Xml.Schema.XmlSchema? GetSchema() => default;
 
     private static string GetStringOrThrow(object key) => key.ToString() ?? throw new ArgumentNullException(nameof(key));
-
-    private sealed class Utf8StringWriter : StringWriter
-    {
-        public override System.Text.Encoding Encoding => System.Text.Encoding.UTF8;
-    }
 }

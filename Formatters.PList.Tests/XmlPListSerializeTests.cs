@@ -8,7 +8,7 @@ using System.Text;
 
 public class XmlPListSerializeTests
 {
-    private readonly PList plist = new PList()
+    private readonly PList plist = new()
         {
             { "testArray", new object[] { 34, "string item in array" } },
             { "testArrayLarge", Enumerable.Range(0, 18).ToArray() },
@@ -33,7 +33,10 @@ public class XmlPListSerializeTests
 
         static System.Xml.Linq.XDocument Serialize(PList value)
         {
-            return Sanitize(value.ToString());
+            using var memoryStream = new MemoryStream();
+            var formatter = new PListAsciiFormatter();
+            formatter.Serialize(memoryStream, value);
+            return Sanitize(Encoding.UTF8.GetString(memoryStream.ToArray()));
         }
 
         static System.Xml.Linq.XDocument FromResource()
