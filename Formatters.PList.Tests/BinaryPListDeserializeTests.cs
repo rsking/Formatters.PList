@@ -9,27 +9,21 @@ namespace Formatters.PList.Tests;
 /// <summary>
 /// Tests for <see cref="PListBinaryFormatter"/> reading.
 /// </summary>
-public class BinaryPListDeserializeTests
+public class BinaryPListDeserializeTests : PListDeserializeTests
 {
-    private readonly PList plist;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="BinaryPListDeserializeTests"/> class.
     /// </summary>
     public BinaryPListDeserializeTests()
+        : base(GetPList())
+    {
+    }
+
+    private static PList GetPList()
     {
         using var stream = Resources.TestBin;
         var formatter = new PListBinaryFormatter();
         var deserialized = formatter.Deserialize(stream);
-        this.plist = (PList)deserialized!;
+        return (PList)deserialized!;
     }
-
-    [Fact]
-    internal void TestVersion() => this.plist.Version.Should().Be(new Version(1, 0));
-
-    [Fact]
-    internal void TestCount() => this.plist.Count.Should().Be(11);
-
-    [Fact]
-    internal void TestIsReadOnly() => this.plist.IsReadOnly.Should().BeFalse();
 }

@@ -140,7 +140,7 @@ public partial class PList
         static DateTime ReadDate(XmlReader reader)
         {
             _ = ReadWhileWhiteSpace(reader);
-            var dateValue = DateTime.Parse(reader.Value, System.Globalization.CultureInfo.InvariantCulture);
+            var dateValue = DateTime.Parse(reader.Value, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AdjustToUniversal);
             _ = ReadWhileWhiteSpace(reader);
             return dateValue;
         }
