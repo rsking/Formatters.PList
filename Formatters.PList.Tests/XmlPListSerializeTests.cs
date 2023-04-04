@@ -58,8 +58,7 @@ public class XmlPListSerializeTests
             // sanitize any data fields
             foreach (var element in document.Descendants("data"))
             {
-                var text = Convert.ToBase64String(Convert.FromBase64String(element.Value), Base64FormattingOptions.None);
-                element.Value = text;
+                element.Value = Convert.ToBase64String(Convert.FromBase64String(element.Value), Base64FormattingOptions.None);
             }
 
             return document;
