@@ -31,8 +31,7 @@ public static class DictionaryExtensions
     /// <param name="dictionary">The dictionary.</param>
     /// <param name="key">The key.</param>
     /// <returns>The <see cref="Nullable{T}"/> <see cref="long"/>.</returns>
-    public static long? GetNullableInt64(this IDictionary<string, object?> dictionary, string key) =>
-        dictionary.ContainsKey(key) ? (long?)dictionary[key] : default;
+    public static long? GetNullableInt64(this IDictionary<string, object?> dictionary, string key) => dictionary.TryGetValue(key, out var value) ? (long?)value : default;
 
     /// <summary>
     /// Gets the <see cref="long"/>.
@@ -48,8 +47,7 @@ public static class DictionaryExtensions
     /// <param name="dictionary">The dictionary.</param>
     /// <param name="key">The key.</param>
     /// <returns>The <see cref="Nullable{T}"/> <see cref="bool"/>.</returns>
-    public static bool? GetNullableBoolean(this IDictionary<string, object?> dictionary, string key) =>
-        dictionary.ContainsKey(key) ? (bool?)dictionary[key] : default;
+    public static bool? GetNullableBoolean(this IDictionary<string, object?> dictionary, string key) => dictionary.TryGetValue(key, out var value) ? (bool?)value : default;
 
     /// <summary>
     /// Gets the <see cref="bool"/>.
@@ -65,8 +63,7 @@ public static class DictionaryExtensions
     /// <param name="dictionary">The dictionary.</param>
     /// <param name="key">The key.</param>
     /// <returns>The <see cref="Nullable{T}"/> <see cref="DateTime"/>.</returns>
-    public static DateTime? GetNullableDateTime(this IDictionary<string, object?> dictionary, string key) =>
-        dictionary.ContainsKey(key) ? (DateTime?)dictionary[key] : default;
+    public static DateTime? GetNullableDateTime(this IDictionary<string, object?> dictionary, string key) => dictionary.TryGetValue(key, out var value) ? (DateTime?)value : default;
 
     /// <summary>
     /// Gets the <see cref="DateTime"/>.
@@ -82,8 +79,7 @@ public static class DictionaryExtensions
     /// <param name="dictionary">The dictionary.</param>
     /// <param name="key">The key.</param>
     /// <returns>The <see cref="string"/> value.</returns>
-    public static string? GetNullableString(this IDictionary<string, object?> dictionary, string key) =>
-        dictionary.ContainsKey(key) ? (string?)dictionary[key] : default;
+    public static string? GetNullableString(this IDictionary<string, object?> dictionary, string key) => dictionary.TryGetValue(key, out var value) ? (string?)value : default;
 
     /// <summary>
     /// Gets the <see cref="string"/>.
