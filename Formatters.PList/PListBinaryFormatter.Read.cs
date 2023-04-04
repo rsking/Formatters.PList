@@ -6,7 +6,9 @@
 
 namespace Formatters.PList;
 
+#if NETSTANDARD || !NET6_0_OR_GREATER
 using System.Runtime.CompilerServices;
+#endif
 using System.Text;
 using static System.Buffers.Binary.BinaryPrimitives;
 
