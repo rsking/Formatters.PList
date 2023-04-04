@@ -44,10 +44,10 @@ public partial class PListBinaryFormatter : System.Runtime.Serialization.IFormat
         var trailer = serializationStream.Read(-32, 32, SeekOrigin.End);
 
         // parse the trailer
-        var offsetByteSize = (int)trailer[6];
-        var objectReferenceSize = (int)trailer[7];
+        var offsetByteSize = trailer[6];
+        var objectReferenceSize = trailer[7];
         var numberObjects = ReadInt64BigEndian(trailer.AsSpan(8, 8));
-        var topObjectOffset = ReadInt64BigEndian(trailer.AsSpan(16, 8));
+        _ = ReadInt64BigEndian(trailer.AsSpan(16, 8));
         var offsetTableStart = ReadInt64BigEndian(trailer.AsSpan(24, 8));
 
         var offsetTable = new long[numberObjects];

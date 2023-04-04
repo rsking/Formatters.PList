@@ -103,8 +103,8 @@ public partial class PListBinaryFormatter
 
     private static DateTime ReadDateTime(Stream stream, long headerPosition)
     {
-        var buffer = stream.Read(headerPosition + 1, 8);
-        return ConvertFromAppleTimeStamp(GetDouble(buffer.AsSpan()));
+        var buffer = stream.Read(headerPosition + 1, sizeof(double)).AsSpan();
+        return ConvertFromAppleTimeStamp(GetDouble(buffer));
 
         static DateTime ConvertFromAppleTimeStamp(double timestamp)
         {
@@ -116,8 +116,8 @@ public partial class PListBinaryFormatter
     {
         var header = stream.ReadByte(headerPosition);
         var byteCount = (int)Math.Pow(2, header & 0xf);
-        var buffer = stream.Read(headerPosition + 1, byteCount);
-        return GetDouble(buffer.AsSpan());
+        var buffer = stream.Read(headerPosition + 1, byteCount).AsSpan();
+        return GetDouble(buffer);
     }
 
     private static string ReadAsciiString(Stream stream, long headerPosition)
@@ -131,7 +131,7 @@ public partial class PListBinaryFormatter
     {
         var charCount = (int)GetCount(stream, headerPosition, out var charStartPosition) * 2;
         var buffer = stream.Read(charStartPosition, charCount);
-        return Encoding.BigEndianUnicode.GetString(buffer);
+        return buffer.Length > 0 ? Encoding.BigEndianUnicode.GetString(buffer) : string.Empty;
     }
 
     private static byte[] ReadBytes(Stream stream, long headerPosition)
@@ -144,37 +144,34 @@ public partial class PListBinaryFormatter
     {
         var headerByte = stream.ReadByte(bytePosition);
         var headerByteTrail = Convert.ToByte(headerByte & 0xf);
-        long count;
         if (headerByteTrail < 15)
         {
-            count = headerByteTrail;
             newBytePosition = bytePosition + 1;
-        }
-        else
-        {
-            count = ReadInt64(stream, bytePosition + 1, out newBytePosition);
+            return headerByteTrail;
         }
 
-        return count;
+        return ReadInt64(stream, bytePosition + 1, out newBytePosition);
     }
 
     private static int GetInt32(ReadOnlySpan<byte> span) => GetInt32(span, span.Length);
 
     private static int GetInt32(ReadOnlySpan<byte> span, int length) => length switch
     {
-        1 => span[0],
-        2 => ReadInt16BigEndian(span),
-        4 => ReadInt32BigEndian(span),
+        sizeof(byte) => span[0],
+        sizeof(short) => ReadInt16BigEndian(span),
+        sizeof(int) => ReadInt32BigEndian(span),
+        _ => throw new InvalidCastException(),
     };
 
     private static long GetInt64(ReadOnlySpan<byte> span) => GetInt64(span, span.Length);
 
     private static long GetInt64(ReadOnlySpan<byte> span, int length) => length switch
     {
-        1 => span[0],
-        2 => ReadInt16BigEndian(span),
-        4 => ReadInt32BigEndian(span),
-        8 => ReadInt64BigEndian(span),
+        sizeof(byte) => span[0],
+        sizeof(short) => ReadInt16BigEndian(span),
+        sizeof(int) => ReadInt32BigEndian(span),
+        sizeof(long) => ReadInt64BigEndian(span),
+        _ => throw new InvalidCastException(),
     };
 
     private static double GetDouble(ReadOnlySpan<byte> span) => GetDouble(span, span.Length);
@@ -183,84 +180,75 @@ public partial class PListBinaryFormatter
 #if NET6_0_OR_GREATER
         => length switch
         {
-            1 => span[0],
-            2 => (double)ReadHalfBigEndian(span),
-            4 => ReadSingleBigEndian(span),
-            8 => ReadDoubleBigEndian(span),
+            sizeof(byte) => span[0],
+            sizeof(short) => (double)ReadHalfBigEndian(span),
+            sizeof(float) => ReadSingleBigEndian(span),
+            sizeof(double) => ReadDoubleBigEndian(span),
+            _ => throw new InvalidCastException(),
         };
 #elif NET5_0_OR_GREATER
     {
         return length switch
         {
-            1 => span[0],
-            4 => ReadSingleBigEndian(span),
-            8 => ReadDoubleBigEndian(span),
+            sizeof(byte) => span[0],
+            sizeof(short) => (double)ReadHalfBigEndian(span),
+            sizeof(float) => ReadSingleBigEndian(span),
+            sizeof(double) => ReadDoubleBigEndian(span),
+            _ => throw new InvalidCastException(),
         };
+
+        static Half ReadHalfBigEndian(ReadOnlySpan<byte> span)
+        {
+            return BitConverter.IsLittleEndian
+                ? Int16BitsToHalf(ReverseEndianness(System.Runtime.InteropServices.MemoryMarshal.Read<short>(span)))
+                : System.Runtime.InteropServices.MemoryMarshal.Read<Half>(span);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static unsafe Half Int16BitsToHalf(short value)
+            {
+                return *(Half*)&value;
+            }
+        }
     }
 #else
     {
         return length switch
         {
-            1 => span[0],
-            4 => ReadSingle(span),
-            8 => ReadDouble(span),
+            sizeof(byte) => span[0],
+            sizeof(short) => ReadHalfBigEndian(span),
+            sizeof(float) => ReadSingleBigEndian(span),
+            sizeof(double) => ReadDoubleBigEndian(span),
+            _ => throw new InvalidCastException(),
         };
 
-        static double ReadDouble(ReadOnlySpan<byte> span)
+        static float ReadHalfBigEndian(ReadOnlySpan<byte> span)
+        {
+            // get the int16
+            var @short = BitConverter.IsLittleEndian
+                ? ReverseEndianness(System.Runtime.InteropServices.MemoryMarshal.Read<short>(span))
+                : System.Runtime.InteropServices.MemoryMarshal.Read<short>(span);
+
+            return Int32BitsToSingle(@short);
+        }
+
+        static float ReadSingleBigEndian(ReadOnlySpan<byte> span)
         {
             return BitConverter.IsLittleEndian
-                ? BitConverter.Int64BitsToDouble(ReverseEndiannessInt64(System.Runtime.InteropServices.MemoryMarshal.Read<long>(span)))
+                ? Int32BitsToSingle(ReverseEndianness(System.Runtime.InteropServices.MemoryMarshal.Read<int>(span)))
+                : System.Runtime.InteropServices.MemoryMarshal.Read<float>(span);
+        }
+
+        static double ReadDoubleBigEndian(ReadOnlySpan<byte> span)
+        {
+            return BitConverter.IsLittleEndian
+                ? BitConverter.Int64BitsToDouble(ReverseEndianness(System.Runtime.InteropServices.MemoryMarshal.Read<long>(span)))
                 : System.Runtime.InteropServices.MemoryMarshal.Read<double>(span);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static long ReverseEndiannessInt64(long value)
-            {
-                return (long)ReverseEndiannessUInt64((ulong)value);
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static ulong ReverseEndiannessUInt64(ulong value)
-            {
-                return ((ulong)ReverseEndiannessUInt32((uint)value) << 32) + ReverseEndiannessUInt32((uint)(value >> 32));
-            }
-        }
-
-        static float ReadSingle(ReadOnlySpan<byte> span)
-        {
-            return !BitConverter.IsLittleEndian
-                ? System.Runtime.InteropServices.MemoryMarshal.Read<float>(span)
-                : Int32BitsToSingle(ReverseEndiannessInt32(System.Runtime.InteropServices.MemoryMarshal.Read<int>(span)));
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static unsafe float Int32BitsToSingle(int value)
-            {
-                return *(float*)&value;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static int ReverseEndiannessInt32(int value)
-            {
-                return (int)ReverseEndiannessUInt32((uint)value);
-            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static uint ReverseEndiannessUInt32(uint value)
+        static unsafe float Int32BitsToSingle(int value)
         {
-            return RotateRight(value & 0x00FF00FFu, 8) // xx zz
-                + RotateLeft(value & 0xFF00FF00u, 8); // ww yy
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static uint RotateRight(uint value, int offset)
-        {
-            return (value >> offset) | (value << (32 - offset));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static uint RotateLeft(uint value, int offset)
-        {
-            return (value << offset) | (value >> (32 - offset));
+            return *(float*)&value;
         }
     }
 #endif
