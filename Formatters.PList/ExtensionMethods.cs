@@ -30,7 +30,7 @@ internal static class ExtensionMethods
     /// </summary>
     /// <param name="stream">The stream to read from.</param>
     /// <param name="offset">A byte offset relative to the <paramref name="origin"/> parameter.</param>
-    /// <param name="origin">A value of type <see cref="SeekOrigin"/>  indicating the reference point used to obtain the new position.</param>
+    /// <param name="origin">A value of type <see cref="SeekOrigin"/> indicating the reference point used to obtain the new position.</param>
     /// <returns>The unsigned byte.</returns>
     public static byte ReadByte(this Stream stream, long offset, SeekOrigin origin = SeekOrigin.Begin)
     {
@@ -52,7 +52,7 @@ internal static class ExtensionMethods
     /// <param name="stream">The stream to read from.</param>
     /// <param name="offset">A byte offset relative to the <paramref name="origin"/> parameter.</param>
     /// <param name="length">A number of bytes to read.</param>
-    /// <param name="origin">A value of type <see cref="SeekOrigin"/>  indicating the reference point used to obtain the new position.</param>
+    /// <param name="origin">A value of type <see cref="SeekOrigin"/> indicating the reference point used to obtain the new position.</param>
     /// <returns>The unsigned byte array.</returns>
     public static byte[] Read(this Stream stream, long offset, int length, SeekOrigin origin = SeekOrigin.Begin)
     {
