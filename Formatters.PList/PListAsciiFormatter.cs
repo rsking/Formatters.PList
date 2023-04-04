@@ -4,24 +4,21 @@
 
 namespace Formatters.PList;
 
-using System.Runtime.Serialization;
-using System.Xml;
-
 /// <summary>
 /// An ASCII formatter for PList values.
 /// </summary>
-public class PListAsciiFormatter : IFormatter
+public class PListAsciiFormatter : System.Runtime.Serialization.IFormatter
 {
     private static System.Xml.Serialization.XmlSerializer? serializer;
 
     /// <inheritdoc />
-    public SerializationBinder? Binder { get; set; }
+    public System.Runtime.Serialization.SerializationBinder? Binder { get; set; }
 
     /// <inheritdoc />
-    public StreamingContext Context { get; set; }
+    public System.Runtime.Serialization.StreamingContext Context { get; set; }
 
     /// <inheritdoc />
-    public ISurrogateSelector? SurrogateSelector { get; set; }
+    public System.Runtime.Serialization.ISurrogateSelector? SurrogateSelector { get; set; }
 
     private static System.Xml.Serialization.XmlSerializer Serializer => serializer ??= new System.Xml.Serialization.XmlSerializer(typeof(PList));
 

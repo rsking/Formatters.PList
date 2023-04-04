@@ -4,9 +4,6 @@
 
 namespace Formatters.PList;
 
-using System.Reflection;
-using System.Xml;
-
 /// <content>
 /// <see cref="PList"/> write methods.
 /// </content>

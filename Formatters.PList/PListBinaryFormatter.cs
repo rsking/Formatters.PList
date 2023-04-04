@@ -6,24 +6,22 @@
 
 namespace Formatters.PList;
 
-using System.IO;
-using System.Runtime.Serialization;
 
 /// <summary>
 /// A binary formatter for PList values.
 /// </summary>
-public partial class PListBinaryFormatter : IFormatter
+public partial class PListBinaryFormatter : System.Runtime.Serialization.IFormatter
 {
     private static readonly DateTime Origin = new(2001, 1, 1, 0, 0, 0, 0);
 
     /// <inheritdoc/>
-    public SerializationBinder? Binder { get; set; }
+    public System.Runtime.Serialization.SerializationBinder? Binder { get; set; }
 
     /// <inheritdoc/>
-    public StreamingContext Context { get; set; }
+    public System.Runtime.Serialization.StreamingContext Context { get; set; }
 
     /// <inheritdoc/>
-    public ISurrogateSelector? SurrogateSelector { get; set; }
+    public System.Runtime.Serialization.ISurrogateSelector? SurrogateSelector { get; set; }
 
     /// <inheritdoc/>
     public object Deserialize(Stream serializationStream)

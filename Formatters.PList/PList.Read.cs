@@ -4,8 +4,6 @@
 
 namespace Formatters.PList;
 
-using System.Xml;
-
 /// <content>
 /// <see cref="PList"/> read methods.
 /// </content>
