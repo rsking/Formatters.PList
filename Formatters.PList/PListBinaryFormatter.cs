@@ -6,6 +6,7 @@
 
 namespace Formatters.PList;
 
+using static System.Buffers.Binary.BinaryPrimitives;
 
 /// <summary>
 /// A binary formatter for PList values.
@@ -34,7 +35,7 @@ public partial class PListBinaryFormatter : System.Runtime.Serialization.IFormat
         // see if this is a PList
         var header = serializationStream.Read(8);
 
-        if (BitConverter.ToInt64(header, 0) != 3472403351741427810)
+        if (ReadInt64BigEndian(header) != 7093288613272891440)
         {
             throw new ArgumentException(Properties.Resources.StreamDoesNotContainAPList, nameof(serializationStream));
         }
@@ -43,22 +44,23 @@ public partial class PListBinaryFormatter : System.Runtime.Serialization.IFormat
         var trailer = serializationStream.Read(-32, 32, SeekOrigin.End);
 
         // parse the trailer
-        var offsetByteSize = BitConverter.ToInt32(RegulateNullBytes(trailer, 6, 1, 4), 0);
-        var objectReferenceSize = BitConverter.ToInt32(RegulateNullBytes(trailer, 7, 1, 4), 0);
-        var refCountBytes = trailer.GetRange(12, 4);
-        Array.Reverse(refCountBytes);
-        var refCount = BitConverter.ToInt32(refCountBytes, 0);
-        var offsetTableOffsetBytes = trailer.GetRange(24, 8);
-        Array.Reverse(offsetTableOffsetBytes);
-        var offsetTableOffset = BitConverter.ToInt64(offsetTableOffsetBytes, 0);
+        var offsetByteSize = (int)trailer[6];
+        var objectReferenceSize = (int)trailer[7];
+        var numberObjects = ReadInt64BigEndian(trailer.AsSpan(8, 8));
+        var topObjectOffset = ReadInt64BigEndian(trailer.AsSpan(16, 8));
+        var offsetTableStart = ReadInt64BigEndian(trailer.AsSpan(24, 8));
 
-        var offsetTable = new int[refCount];
-        _ = serializationStream.Seek(offsetTableOffset, SeekOrigin.Begin);
-        for (var i = 0; i < refCount; i++)
+        var offsetTable = new long[numberObjects];
+        _ = serializationStream.Seek(offsetTableStart, SeekOrigin.Begin);
+        if (numberObjects > 0)
         {
-            var buffer = serializationStream.Read(offsetByteSize);
-            Array.Reverse(buffer);
-            offsetTable[i] = BitConverter.ToInt32(RegulateNullBytes(buffer, 4), 0);
+            var totalBytes = numberObjects * offsetByteSize;
+            var buffer = serializationStream.Read((int)totalBytes).AsSpan();
+            for (var i = 0; i < numberObjects; i++)
+            {
+                offsetTable[i] = GetInt64(buffer, offsetByteSize);
+                buffer = buffer[offsetByteSize..];
+            }
         }
 
         return Read(serializationStream, offsetTable, 0, objectReferenceSize) switch
@@ -106,15 +108,35 @@ public partial class PListBinaryFormatter : System.Runtime.Serialization.IFormat
 
         static int GetLast(IList<int> offsetTable)
         {
-#if NETSTANDARD2_1_OR_GREATER
             return offsetTable[^1];
-#else
-            return offsetTable[offsetTable.Count - 1];
-#endif
         }
-}
+    }
 
-    private static byte[] RegulateNullBytes(byte[] value, int start, int length, int minBytes = 1) => RegulateNullBytes(value.GetRange(start, length), minBytes);
+    private static int GetByteCount(byte[] value)
+    {
+        if (BitConverter.IsLittleEndian)
+        {
+            for (var i = 0; i < value.Length; i++)
+            {
+                if (value[i] == 0)
+                {
+                    return i;
+                }
+            }
+        }
+        else
+        {
+            for (var i = value.Length - 1; i >= 0; i--)
+            {
+                if (value[i] == 0)
+                {
+                    return i;
+                }
+            }
+        }
+
+        return value.Length;
+    }
 
     private static byte[] RegulateNullBytes(byte[] value, int minBytes = 1)
     {

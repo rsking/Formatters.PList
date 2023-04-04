@@ -8,6 +8,7 @@
     <PackageTags>PList;IFormatter;IXmlSerializable</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/rsking/Formatters.PList</PackageProjectUrl>
+    <AllowUnsafeBlocks Condition=" $([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard' ">true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,11 @@
 
   <ItemGroup>
     <Using Include="System.Xml" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" $([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard' and $([MSBuild]::VersionLessThan($([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')), '2.1')) ">
+    <PackageReference Include="PolySharp" Version="1.12.1" />
+    <PackageReference Include="System.Memory" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
