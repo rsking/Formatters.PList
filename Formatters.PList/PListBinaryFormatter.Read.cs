@@ -77,7 +77,7 @@ public partial class PListBinaryFormatter
         var references = new List<int>();
         for (var i = referenceStartPosition; i < referenceStartPosition + (referenceCount * referenceSize); i += referenceSize)
         {
-            var referenceBuffer = stream.Read(i, referenceSize).Reverse();
+            var referenceBuffer = stream.Read(i, referenceSize);
             references.Add(GetInt32(referenceBuffer.AsSpan()));
         }
 

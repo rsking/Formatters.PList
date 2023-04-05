@@ -12,20 +12,6 @@ namespace Formatters.PList;
 internal static class ExtensionMethods
 {
     /// <summary>
-    /// Gets a range of <see cref="byte" /> from the specified start and length.
-    /// </summary>
-    /// <param name="value">The byte array.</param>
-    /// <param name="start">The start index.</param>
-    /// <param name="length">The number of bytes to get.</param>
-    /// <returns>The range of <see cref="byte"/>.</returns>
-    public static byte[] GetRange(this byte[] value, int start, int length)
-    {
-        var bytes = new byte[length];
-        Array.Copy(value, start, bytes, 0, bytes.Length);
-        return bytes;
-    }
-
-    /// <summary>
     /// Reads a byte from the stream at the specified offset and advances the position within the stream by one byte, or returns -1 if at the end of the stream.
     /// </summary>
     /// <param name="stream">The stream to read from.</param>
@@ -82,15 +68,4 @@ internal static class ExtensionMethods
         stream.Write(bytes, 0, buffer.Length);
     }
 #endif
-
-    /// <summary>
-    /// Reverses the array.
-    /// </summary>
-    /// <param name="input">The input array.</param>
-    /// <returns>The reversed array.</returns>
-    public static byte[] Reverse(this byte[] input)
-    {
-        Array.Reverse(input);
-        return input;
-    }
 }

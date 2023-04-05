@@ -38,7 +38,7 @@ public abstract class PListDeserializeTests
     internal void TestDictionary() => this.plist["testDict"].Should().BeAssignableTo<IDictionary<string, object>>().Which.Should().BeEquivalentTo(new Dictionary<string, object>(StringComparer.Ordinal) { { "test string", "inner dict item" } });
 
     [Fact]
-    internal void TestLargeDictionary() => this.plist["testDictLarge"].Should().BeAssignableTo<IDictionary<string, object>>().Which.Should().BeEquivalentTo(Enumerable.Range(0, 18).ToDictionary(i => i.ToString("00"), i => i, StringComparer.Ordinal));
+    internal void TestLargeDictionary() => this.plist["testDictLarge"].Should().BeAssignableTo<IDictionary<string, object>>().Which.Should().BeEquivalentTo(Enumerable.Range(0, 18).ToDictionary(i => i.ToString("00", System.Globalization.CultureInfo.InvariantCulture), i => i, StringComparer.Ordinal));
 
     [Fact]
     internal void TestDouble() => this.plist["testDouble"].Should().BeOfType<double>().Which.Should().Be(1.34223);
