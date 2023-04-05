@@ -6,7 +6,6 @@
 
 namespace Formatters.PList;
 
-using System.Net.Http.Headers;
 using static System.Buffers.Binary.BinaryPrimitives;
 
 /// <summary>
@@ -113,7 +112,7 @@ public partial class PListBinaryFormatter : System.Runtime.Serialization.IFormat
         trailerSpan = trailerSpan[sizeof(long)..];
         WriteInt64BigEndian(trailerSpan, offsetTableOffset);
 
-        serializationStream.Write(trailer);
+        serializationStream.Write(trailer, 0, trailer.Length);
     }
 
     private static int GetByteCount(int value)
@@ -165,5 +164,18 @@ public partial class PListBinaryFormatter : System.Runtime.Serialization.IFormat
     {
         var byteCount = GetByteCount(span);
         span = span[^Math.Max(byteCount, minBytes)..];
+    }
+
+    private static class DataType
+    {
+        public const byte Boolean = 0x00;
+        public const byte Int64 = 0x10;
+        public const byte Double = 0x20;
+        public const byte DateTime = 0x30;
+        public const byte Bytes = 0x40;
+        public const byte Ascii = 0x50;
+        public const byte Unicode = 0x60;
+        public const byte Array = 0xA0;
+        public const byte Dictionary = 0xD0;
     }
 }

@@ -13,25 +13,36 @@ using static System.Buffers.Binary.BinaryPrimitives;
 /// </summary>
 public partial class PListBinaryFormatter
 {
+    private const byte RightBits = 0xF;
+
     private static readonly double Log2 = Math.Log(2);
 
-    private static int CountReferences(object value) => value switch
+    private static int CountReferences(object value)
     {
-        IDictionary<string, object> dict => dict.Values.Sum(CountReferences) + dict.Keys.Count + 1,
-        IList<object> list => list.Sum(CountReferences) + 1,
-        _ => 1,
-    };
+        return value switch
+        {
+            bool or short or int or long or float or double or string or byte[] or DateTime => 1,
+            System.Collections.IDictionary dict => Sum(dict.Values) + dict.Keys.Count + 1,
+            System.Collections.IList list => Sum(list) + 1,
+            _ => throw new InvalidCastException(),
+        };
+
+        static int Sum(System.Collections.IEnumerable enumerable)
+        {
+            var total = 0;
+            foreach (var item in enumerable)
+            {
+                total += CountReferences(item);
+            }
+
+            return total;
+        }
+    }
 
     private static void Write(Stream stream, IList<long> offsetTable, IList<object?> offsetValues, int objectReferenceSize, object value)
     {
         switch (value)
         {
-            case IDictionary<string, object> dict:
-                Write(stream, offsetTable, offsetValues, objectReferenceSize, dict);
-                break;
-            case IList<object> list:
-                Write(stream, offsetTable, offsetValues, objectReferenceSize, list);
-                break;
             case byte[] bytes:
                 Write(stream, bytes);
                 break;
@@ -59,18 +70,24 @@ public partial class PListBinaryFormatter
             case bool boolValue:
                 Write(stream, boolValue);
                 break;
+            case System.Collections.IDictionary dict:
+                Write(stream, offsetTable, offsetValues, objectReferenceSize, dict);
+                break;
+            case System.Collections.IList list:
+                Write(stream, offsetTable, offsetValues, objectReferenceSize, list);
+                break;
         }
     }
 
-    private static void Write(Stream stream, IList<long> offsetTable, IList<object?> offsetValues, int referenceSize, IDictionary<string, object> dictionary)
+    private static void Write(Stream stream, IList<long> offsetTable, IList<object?> offsetValues, int referenceSize, System.Collections.IDictionary dictionary)
     {
         if (dictionary.Count < 15)
         {
-            stream.WriteByte(Convert.ToByte(0xD0 | dictionary.Count));
+            stream.WriteByte(Convert.ToByte(DataType.Dictionary | dictionary.Count));
         }
         else
         {
-            stream.WriteByte(0xD0 | 0x0F);
+            stream.WriteByte(DataType.Dictionary | RightBits);
             Write(stream, dictionary.Count);
         }
 
@@ -121,16 +138,16 @@ public partial class PListBinaryFormatter
         stream.Position = endPosition;
     }
 
-    private static void Write(Stream stream, IList<long> offsetTable, IList<object?> offsetValues, int referenceSize, IList<object> values)
+    private static void Write(Stream stream, IList<long> offsetTable, IList<object?> offsetValues, int referenceSize, System.Collections.IList values)
     {
         // write the header
         if (values.Count < 15)
         {
-            stream.WriteByte(Convert.ToByte(0xA0 | Convert.ToByte(values.Count)));
+            stream.WriteByte(Convert.ToByte(DataType.Array | Convert.ToByte(values.Count)));
         }
         else
         {
-            stream.WriteByte(0xA0 | 0x0F);
+            stream.WriteByte(DataType.Array | RightBits);
             Write(stream, values.Count);
         }
 
@@ -179,7 +196,7 @@ public partial class PListBinaryFormatter
         }
 
         span = span[^count..];
-        stream.WriteByte(Convert.ToByte(0x10 | (int)GetCountValue(count)));
+        stream.WriteByte(Convert.ToByte(DataType.Int64 | (int)GetCountValue(count)));
         stream.Write(span);
 
         static double GetCountValue(int count)
@@ -199,7 +216,7 @@ public partial class PListBinaryFormatter
         }
 
         span = span[^count..];
-        stream.WriteByte(Convert.ToByte(0x20 | (int)GetCountValue(count)));
+        stream.WriteByte(Convert.ToByte(DataType.Double | (int)GetCountValue(count)));
         stream.Write(span);
 
         static double GetCountValue(int count)
@@ -215,7 +232,7 @@ public partial class PListBinaryFormatter
         WriteDoubleBigEndian(span, appleTimeStamp);
         Regulate(ref span, sizeof(double));
 
-        stream.WriteByte(0x33);
+        stream.WriteByte(DataType.DateTime | 0x03);
         stream.Write(span);
 
         static double ConvertToAppleTimeStamp(DateTime date)
@@ -229,15 +246,15 @@ public partial class PListBinaryFormatter
     {
         if (value.Length < 15)
         {
-            stream.WriteByte(Convert.ToByte(0x40 | Convert.ToByte(value.Length)));
+            stream.WriteByte(Convert.ToByte(DataType.Bytes | value.Length));
         }
         else
         {
-            stream.WriteByte(0x40 | 0xf);
+            stream.WriteByte(DataType.Bytes | RightBits);
             Write(stream, value.Length);
         }
 
-        stream.Write(value);
+        stream.Write(value, 0, value.Length);
     }
 
     private static void Write(Stream stream, string value, bool head)
@@ -246,30 +263,29 @@ public partial class PListBinaryFormatter
 
         // see if this contains any unicode characters
         var id = value.Any(c => c > MaxAnsiCode)
-            ? 0x60
-            : 0x50;
+            ? DataType.Unicode
+            : DataType.Ascii;
 
         if (head)
         {
             if (value.Length < 15)
             {
-                stream.WriteByte(Convert.ToByte(id | Convert.ToByte(value.Length)));
+                stream.WriteByte(Convert.ToByte(id | value.Length));
             }
             else
             {
-                stream.WriteByte(Convert.ToByte(id | 0xf));
+                stream.WriteByte(Convert.ToByte(id | RightBits));
                 Write(stream, value.Length);
             }
         }
 
-        if (id == 0x60)
+        var bytes = id switch
         {
-            stream.Write(System.Text.Encoding.BigEndianUnicode.GetBytes(value));
-        }
-        else
-        {
-            stream.Write(System.Text.Encoding.UTF8.GetBytes(value));
-        }
+            DataType.Unicode => System.Text.Encoding.BigEndianUnicode.GetBytes(value),
+            _ => System.Text.Encoding.UTF8.GetBytes(value),
+        };
+
+        stream.Write(bytes, 0, bytes.Length);
     }
 
     private static void AddToOffsetValues(IList<object?> offsetValues, object value) => offsetValues.Add(value?.GetType().IsPrimitive != true ? null : value);

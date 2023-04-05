@@ -48,13 +48,6 @@ internal static class ExtensionMethods
         return bytes;
     }
 
-    /// <summary>
-    /// Writes the specfied bytes to the stream.
-    /// </summary>
-    /// <param name="stream">The stream to write to.</param>
-    /// <param name="buffer">The bytes to write.</param>
-    public static void Write(this Stream stream, byte[] buffer) => stream.Write(buffer, 0, buffer.Length);
-
 #if NETSTANDARD2_0
     /// <summary>
     /// Writes the specfied bytes to the stream.

@@ -17,20 +17,22 @@ using static System.Buffers.Binary.BinaryPrimitives;
 /// </summary>
 public partial class PListBinaryFormatter
 {
+    private const byte LeftBits = 0xF0;
+
     private static object? Read(Stream stream, IList<long> offsetTable, int index, int objectReferenceSize)
     {
         var header = stream.ReadByte(offsetTable[index]);
-        return (header & 0xF0) switch
+        return (header & LeftBits) switch
         {
-            0 => (header == 0) ? null : header == 9, // boolean, If the byte is 0 return null, 9 return true, 8 return false
-            0x10 => ReadInt64(stream, offsetTable[index]), // int64
-            0x20 => ReadDouble(stream, offsetTable[index]), // double
-            0x30 => ReadDateTime(stream, offsetTable[index]), // date time
-            0x40 => ReadBytes(stream, offsetTable[index]), // bytes
-            0x50 => ReadAsciiString(stream, offsetTable[index]), // ASCII
-            0x60 => ReadUnicodeString(stream, offsetTable[index]), // Unicode
-            0xa0 => ReadArray(stream, offsetTable, index, objectReferenceSize), // Array
-            0xd0 => ReadDictionary(stream, offsetTable, index, objectReferenceSize), // Dictionary
+            DataType.Boolean => (header == 0) ? null : header == 9, // boolean, If the byte is 0 return null, 9 return true, 8 return false
+            DataType.Int64 => ReadInt64(stream, offsetTable[index]),
+            DataType.Double => ReadDouble(stream, offsetTable[index]),
+            DataType.DateTime => ReadDateTime(stream, offsetTable[index]),
+            DataType.Bytes => ReadBytes(stream, offsetTable[index]),
+            DataType.Ascii => ReadAsciiString(stream, offsetTable[index]),
+            DataType.Unicode => ReadUnicodeString(stream, offsetTable[index]),
+            DataType.Array => ReadArray(stream, offsetTable, index, objectReferenceSize),
+            DataType.Dictionary => ReadDictionary(stream, offsetTable, index, objectReferenceSize),
             _ => throw new NotSupportedException(),
         };
     }
@@ -94,7 +96,7 @@ public partial class PListBinaryFormatter
     private static long ReadInt64(Stream stream, long headerPosition, out long newHeaderPosition)
     {
         var header = stream.ReadByte(headerPosition);
-        var byteCount = (int)Math.Pow(2, header & 0xf);
+        var byteCount = (int)Math.Pow(2, header & RightBits);
 
         var buffer = stream.Read(headerPosition + 1, byteCount);
 
@@ -117,7 +119,7 @@ public partial class PListBinaryFormatter
     private static double ReadDouble(Stream stream, long headerPosition)
     {
         var header = stream.ReadByte(headerPosition);
-        var byteCount = (int)Math.Pow(2, header & 0xf);
+        var byteCount = (int)Math.Pow(2, header & RightBits);
         var buffer = stream.Read(headerPosition + 1, byteCount).AsSpan();
         return GetDouble(buffer);
     }
@@ -145,7 +147,7 @@ public partial class PListBinaryFormatter
     private static long GetCount(Stream stream, long bytePosition, out long newBytePosition)
     {
         var headerByte = stream.ReadByte(bytePosition);
-        var headerByteTrail = Convert.ToByte(headerByte & 0xf);
+        var headerByteTrail = Convert.ToByte(headerByte & RightBits);
         if (headerByteTrail < 15)
         {
             newBytePosition = bytePosition + 1;
