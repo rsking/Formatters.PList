@@ -42,7 +42,7 @@ public partial class PListBinaryFormatter
 
         // Check if the following integer has a header aswell so we increase the referenceStartPosition by two to account for that.
         var referenceStartPosition = referenceCount >= 15
-            ? offsetTable[index] + 2 + GetByteCount(BitConverter.GetBytes(referenceCount))
+            ? offsetTable[index] + 2 + GetByteCount(referenceCount)
             : offsetTable[index] + 1;
 
         var references = new int[referenceCount * 2];
@@ -71,7 +71,7 @@ public partial class PListBinaryFormatter
 
         // Check if the following integer has a header aswell so we increase the referenceStartPosition by two to account for that.
         var referenceStartPosition = referenceCount >= 15
-            ? offsetTable[index] + 2 + GetByteCount(BitConverter.GetBytes(referenceCount))
+            ? offsetTable[index] + 2 + GetByteCount(referenceCount)
             : offsetTable[index] + 1;
 
         var references = new List<int>();

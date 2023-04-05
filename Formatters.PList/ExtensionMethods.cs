@@ -69,6 +69,20 @@ internal static class ExtensionMethods
     /// <param name="buffer">The bytes to write.</param>
     public static void Write(this Stream stream, byte[] buffer) => stream.Write(buffer, 0, buffer.Length);
 
+#if NETSTANDARD2_0
+    /// <summary>
+    /// Writes the specfied bytes to the stream.
+    /// </summary>
+    /// <param name="stream">The stream to write to.</param>
+    /// <param name="buffer">The bytes to write.</param>
+    public static void Write(this Stream stream, ReadOnlySpan<byte> buffer)
+    {
+        var bytes = new byte[buffer.Length];
+        buffer.CopyTo(bytes);
+        stream.Write(bytes, 0, buffer.Length);
+    }
+#endif
+
     /// <summary>
     /// Reverses the array.
     /// </summary>

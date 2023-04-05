@@ -6,6 +6,7 @@
 
 namespace Formatters.PList;
 
+using System.Net.Http.Headers;
 using static System.Buffers.Binary.BinaryPrimitives;
 
 /// <summary>
@@ -81,93 +82,88 @@ public partial class PListBinaryFormatter : System.Runtime.Serialization.IFormat
         var calculatedReferenceCount = CountReferences(graph);
 
         // calculate the reference size.
-        var referenceSize = RegulateNullBytes(BitConverter.GetBytes(calculatedReferenceCount)).Length;
+        var referenceSize = GetByteCount(calculatedReferenceCount);
 
         // write the header
         Write(serializationStream, "bplist00", head: false);
 
-        var offsetTable = new List<int> { (int)serializationStream.Position };
+        var offsetTable = new List<long> { serializationStream.Position };
         Write(serializationStream, offsetTable, new List<object?>() { null }, referenceSize, graph);
 
         var offsetTableOffset = serializationStream.Length;
-        var offsetByteSize = RegulateNullBytes(BitConverter.GetBytes(GetLast(offsetTable))).Length;
+        var offsetByteSize = GetByteCount(offsetTable[^1]);
 
         for (var i = 0; i < offsetTable.Count; i++)
         {
-            serializationStream.Write(RegulateNullBytes(BitConverter.GetBytes(offsetTable[i]), offsetByteSize).Reverse());
+            var offsetTableSpan = GetSpan(offsetTable[i], offsetByteSize);
+            serializationStream.Write(offsetTableSpan);
         }
 
-        serializationStream.Write(new byte[6]);
-        serializationStream.WriteByte(Convert.ToByte(offsetByteSize));
-        serializationStream.WriteByte(Convert.ToByte(referenceSize));
+        var trailer = new byte[32];
+        trailer[6] = Convert.ToByte(offsetByteSize);
+        trailer[7] = Convert.ToByte(referenceSize);
 
-        serializationStream.Write(BitConverter.GetBytes((long)offsetTable.Count).Reverse());
+        Span<byte> trailerSpan = trailer;
+        trailerSpan = trailerSpan[8..];
+        WriteInt64BigEndian(trailerSpan, offsetTable.Count);
 
-        serializationStream.Write(BitConverter.GetBytes(0L));
-        serializationStream.Write(BitConverter.GetBytes(offsetTableOffset).Reverse());
+        trailerSpan = trailerSpan[sizeof(long)..];
+        WriteInt64BigEndian(trailerSpan, 0L);
 
-        static int GetLast(IList<int> offsetTable)
-        {
-            return offsetTable[^1];
-        }
+        trailerSpan = trailerSpan[sizeof(long)..];
+        WriteInt64BigEndian(trailerSpan, offsetTableOffset);
+
+        serializationStream.Write(trailer);
     }
 
-    private static int GetByteCount(byte[] value)
+    private static int GetByteCount(int value)
     {
-        if (BitConverter.IsLittleEndian)
+        Span<byte> span = stackalloc byte[sizeof(int)];
+        WriteInt32BigEndian(span, value);
+        return GetByteCount(span);
+    }
+
+    private static int GetByteCount(long value)
+    {
+        Span<byte> span = stackalloc byte[sizeof(long)];
+        WriteInt64BigEndian(span, value);
+        return GetByteCount(span);
+    }
+
+    private static int GetByteCount(ReadOnlySpan<byte> value)
+    {
+        const byte Null = 0;
+
+        for (var i = value.Length - 1; i >= 0; i--)
         {
-            for (var i = 0; i < value.Length; i++)
+            if (value[i] == Null)
             {
-                if (value[i] == 0)
-                {
-                    return i;
-                }
-            }
-        }
-        else
-        {
-            for (var i = value.Length - 1; i >= 0; i--)
-            {
-                if (value[i] == 0)
-                {
-                    return i;
-                }
+                return value.Length - i - 1;
             }
         }
 
         return value.Length;
     }
 
-    private static byte[] RegulateNullBytes(byte[] value, int minBytes = 1)
+    private static ReadOnlySpan<byte> GetSpan(int value, int minBytes = 1)
     {
-        Array.Reverse(value);
-        var bytes = new List<byte>(value);
-        for (var i = 0; i < bytes.Count; i++)
-        {
-            if (bytes[i] == 0 && bytes.Count > minBytes)
-            {
-                if (bytes.Remove(bytes[i]))
-                {
-                    i--;
-                }
-            }
-            else
-            {
-                break;
-            }
-        }
+        Span<byte> span = new byte[sizeof(int)];
+        WriteInt32BigEndian(span, value);
+        Regulate(ref span, minBytes);
+        return span;
+    }
 
-        if (bytes.Count < minBytes)
-        {
-            var dist = minBytes - bytes.Count;
-            for (var i = 0; i < dist; i++)
-            {
-                bytes.Insert(0, 0);
-            }
-        }
+    private static ReadOnlySpan<byte> GetSpan(long value, int minBytes = 1)
+    {
+        Span<byte> span = new byte[sizeof(long)];
+        WriteInt64BigEndian(span, value);
+        Regulate(ref span, minBytes);
+        return span;
+    }
 
-        value = bytes.ToArray();
-        Array.Reverse(value);
-        return value;
+    private static void Regulate(ref Span<byte> span, int minBytes = 1)
+    {
+        var byteCount = GetByteCount(span);
+        span = span[^Math.Max(byteCount, minBytes)..];
     }
 }

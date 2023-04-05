@@ -45,7 +45,7 @@ public class BinaryPListSerializeTests
         { "testInt", -3455 },
         { "testBoolFalse", false },
         { "testArray", new List<object> { 34, "string item in array" } },
-        { "testArrayLarge", new List<object> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 } },
+        { "testArrayLarge", Enumerable.Range(0, 18).Cast<object>().ToList() },
         { "testString", "hello there" },
     };
 
