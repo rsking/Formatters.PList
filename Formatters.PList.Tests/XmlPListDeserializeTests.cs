@@ -19,15 +19,15 @@ public class XmlPListDeserializeTests : PListDeserializeTests
     {
     }
 
-    private static PList GetPList()
+    internal static PList GetPList()
     {
         using var reader = System.Xml.XmlReader.Create(Resources.TestXml, new System.Xml.XmlReaderSettings
         {
             XmlResolver = default,
             DtdProcessing = System.Xml.DtdProcessing.Ignore,
         });
+
         var serializer = new System.Xml.Serialization.XmlSerializer(typeof(PList));
-        var deserialized = serializer.Deserialize(reader);
-        return (PList)deserialized!;
+        return (PList)serializer.Deserialize(reader)!;
     }
 }

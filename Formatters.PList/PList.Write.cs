@@ -5,7 +5,7 @@
 namespace Formatters.PList;
 
 /// <content>
-/// <see cref="PList"/> write methods.
+/// <see cref="PList"/> <see cref="System.Xml.Serialization.IXmlSerializable"/> write methods.
 /// </content>
 public partial class PList
 {

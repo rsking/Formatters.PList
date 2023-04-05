@@ -31,4 +31,45 @@ internal static class Resources
     /// </summary>
     public static Stream TestXml => typeof(Resources).Assembly.GetManifestResourceStream(typeof(Resources).Namespace + ".testXml.plist")
         ?? throw new InvalidOperationException();
+
+    /// <summary>
+    /// The PList.
+    /// </summary>
+    public static readonly PList PList = new()
+    {
+        { "testBoolTrue", true },
+        { "testDouble", 1.34223 },
+        { "testImage", Resources.ImageBytes },
+        {
+            "testDictLarge",
+            new Dictionary<string, object>(StringComparer.Ordinal)
+            {
+                { "15", 15 },
+                { "03", 3 },
+                { "07", 7 },
+                { "06", 6 },
+                { "04", 4 },
+                { "12", 12 },
+                { "02", 2 },
+                { "17", 17 },
+                { "01", 1 },
+                { "05", 5 },
+                { "08", 8 },
+                { "09", 9 },
+                { "10", 10 },
+                { "00", 0 },
+                { "11", 11 },
+                { "13", 13 },
+                { "14", 14 },
+                { "16", 16 },
+            }
+        },
+        { "testDate", new DateTime(2011, 9, 25, 2, 31, 04, DateTimeKind.Utc) },
+        { "testDict", new Dictionary<string, object>(StringComparer.Ordinal) { { "test string", "inner dict item" } } },
+        { "testInt", -3455 },
+        { "testBoolFalse", false },
+        { "testArray", new List<object> { 34, "string item in array" } },
+        { "testArrayLarge", Enumerable.Range(0, 18).ToList() },
+        { "testString", "hello there" },
+    };
 }
