@@ -18,32 +18,35 @@ public partial class PList
         }
 
         writer.WriteAttributeString("version", "1.0");
-        WriteDictionary(writer, 0, this);
+        var indentLevel = writer.Settings?.Indent != false ? 0 : -1;
+        WriteDictionary(writer, indentLevel, writer.Settings?.IndentChars ?? "\t", this);
     }
 
-    private static void WriteDictionary(XmlWriter writer, int indentLevel, System.Collections.IDictionary dictionary)
+    private static void WriteDictionary(XmlWriter writer, int indentLevel, string indentChars, System.Collections.IDictionary dictionary)
     {
-        writer.WriteWhitespace(new string('\t', indentLevel));
+        var baseIndent = CreateIndent(indentLevel, indentChars);
+        writer.WriteWhitespace(baseIndent);
+
         writer.WriteStartElement(DictionaryElementName);
         writer.WriteWhitespace(Environment.NewLine);
 
-        var indent = new string('\t', indentLevel + 1);
+        var indent = CreateIndent(indentLevel + 1, indentChars);
         foreach (var key in dictionary.Keys)
         {
             if (dictionary[key] is object value)
             {
                 writer.WriteWhitespace(indent);
                 writer.WriteElementString(KeyElementName, key.ToString());
-                WriteValue(writer, indentLevel + 1, value);
+                WriteValue(writer, indentLevel + 1, indentChars, value);
                 writer.WriteWhitespace(Environment.NewLine);
             }
         }
 
-        writer.WriteWhitespace(new string('\t', indentLevel));
+        writer.WriteWhitespace(baseIndent);
         writer.WriteEndElement();
     }
 
-    private static void WriteValue(XmlWriter writer, int indentLevel, object value)
+    private static void WriteValue(XmlWriter writer, int indentLevel, string indentChars, object value)
     {
         if (value is bool boolValue)
         {
@@ -82,17 +85,43 @@ public partial class PList
         {
             // put the dictionary on a new line.
             writer.WriteWhitespace(Environment.NewLine);
-            WriteDictionary(writer, indentLevel, dictionary);
+            WriteDictionary(writer, indentLevel, indentChars, dictionary);
         }
         else if (value is System.Collections.IEnumerable enumerable)
         {
             writer.WriteStartElement(ArrayElementName);
             foreach (var item in enumerable)
             {
-                WriteValue(writer, indentLevel, item);
+                WriteValue(writer, indentLevel, indentChars, item);
             }
 
             writer.WriteEndElement();
+        }
+    }
+
+    private static string? CreateIndent(int level, string chars)
+    {
+        return level switch
+        {
+            < 0 => default,
+            0 => string.Empty,
+            1 => chars,
+            int l => CreateIndentCore(l, chars),
+        };
+
+        static string? CreateIndentCore(int level, string chars)
+        {
+            var charArray = new char[level * chars.Length];
+
+            for (var i = 0; i < level; i+= chars.Length)
+            {
+                for (var k = 0; k < chars.Length; k++)
+                {
+                    charArray[i + k] = chars[k];
+                }
+            }
+
+            return new string(charArray);
         }
     }
 }

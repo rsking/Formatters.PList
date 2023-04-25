@@ -34,7 +34,7 @@ public class PListAsciiFormatter : System.Runtime.Serialization.IFormatter
     public void Serialize(Stream serializationStream, object graph)
     {
         using var writer = new StreamWriter(serializationStream, System.Text.Encoding.UTF8);
-        using var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings { Encoding = writer.Encoding });
+        using var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings { Encoding = writer.Encoding, Indent = true, IndentChars = "\t" });
         xmlWriter.WriteDocType("plist", "-//Apple//DTD PLIST 1.0//EN", "http://www.apple.com/DTDs/PropertyList-1.0.dtd", subset: null);
         Serializer.Serialize(xmlWriter, graph);
     }
