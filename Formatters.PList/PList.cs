@@ -142,7 +142,7 @@ public partial class PList : IDictionary<string, object>, IDictionary, IXmlSeria
     public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => this.DictionaryImplementation.GetEnumerator();
 
     /// <inheritdoc />
-    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)this.DictionaryImplementation).GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => this.DictionaryImplementation.GetEnumerator();
 
     /// <inheritdoc />
     public void Add(KeyValuePair<string, object> item) => this.DictionaryImplementation.Add(item);
