@@ -159,7 +159,7 @@ public partial class PListBinaryFormatter
         foreach (var value in values)
         {
             var index = IndexOfPrimitive(offsetValues, value);
-            if (index == -1)
+            if (index is -1)
             {
                 references.Add(offsetTable.Count);
                 offsetTable.Add((int)stream.Position);
@@ -199,6 +199,7 @@ public partial class PListBinaryFormatter
         stream.WriteByte(Convert.ToByte(DataType.Int64 | (int)GetCountValue(count)));
         stream.Write(span);
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static double GetCountValue(int count)
         {
             return Math.Log(count) / Log2;
@@ -219,6 +220,7 @@ public partial class PListBinaryFormatter
         stream.WriteByte(Convert.ToByte(DataType.Double | (int)GetCountValue(count)));
         stream.Write(span);
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static double GetCountValue(int count)
         {
             return Math.Log(count) / Log2;
@@ -235,6 +237,7 @@ public partial class PListBinaryFormatter
         stream.WriteByte(DataType.DateTime | 0x03);
         stream.Write(span);
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static double ConvertToAppleTimeStamp(DateTime date)
         {
             var diff = date - Origin;

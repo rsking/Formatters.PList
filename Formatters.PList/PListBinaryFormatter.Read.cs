@@ -6,9 +6,6 @@
 
 namespace Formatters.PList;
 
-#if NETSTANDARD || !NET6_0_OR_GREATER
-using System.Runtime.CompilerServices;
-#endif
 using System.Text;
 using static System.Buffers.Binary.BinaryPrimitives;
 
@@ -110,6 +107,7 @@ public partial class PListBinaryFormatter
         var buffer = stream.Read(headerPosition + 1, sizeof(double)).AsSpan();
         return ConvertFromAppleTimeStamp(GetDouble(buffer));
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static DateTime ConvertFromAppleTimeStamp(double timestamp)
         {
             return Origin.AddSeconds(timestamp);
@@ -157,6 +155,7 @@ public partial class PListBinaryFormatter
         return ReadInt64(stream, bytePosition + 1, out newBytePosition);
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     private static int GetInt32(ReadOnlySpan<byte> span) => GetInt32(span, span.Length);
 
     private static int GetInt32(ReadOnlySpan<byte> span, int length) => length switch
@@ -167,6 +166,7 @@ public partial class PListBinaryFormatter
         _ => throw new InvalidCastException(),
     };
 
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     private static long GetInt64(ReadOnlySpan<byte> span) => GetInt64(span, span.Length);
 
     private static long GetInt64(ReadOnlySpan<byte> span, int length) => length switch
@@ -178,6 +178,7 @@ public partial class PListBinaryFormatter
         _ => throw new InvalidCastException(),
     };
 
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     private static double GetDouble(ReadOnlySpan<byte> span) => GetDouble(span, span.Length);
 
     private static double GetDouble(ReadOnlySpan<byte> span, int length)
@@ -207,7 +208,7 @@ public partial class PListBinaryFormatter
                 ? Int16BitsToHalf(ReverseEndianness(System.Runtime.InteropServices.MemoryMarshal.Read<short>(span)))
                 : System.Runtime.InteropServices.MemoryMarshal.Read<Half>(span);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             static unsafe Half Int16BitsToHalf(short value)
             {
                 return *(Half*)&value;
@@ -249,7 +250,7 @@ public partial class PListBinaryFormatter
                 : System.Runtime.InteropServices.MemoryMarshal.Read<double>(span);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static unsafe float Int32BitsToSingle(int value)
         {
             return *(float*)&value;

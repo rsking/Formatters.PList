@@ -169,7 +169,12 @@ public partial class PList : IDictionary<string, object>, IDictionary, IXmlSeria
     public bool Remove(string key) => this.DictionaryImplementation.Remove(key);
 
     /// <inheritdoc />
-    public bool TryGetValue(string key, out object value)
+    public bool TryGetValue(
+        string key,
+#if NET5_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)]
+#endif
+        out object value)
     {
         if (this.DictionaryImplementation.TryGetValue(key, out var innerValue) && innerValue is not null)
         {
@@ -177,7 +182,12 @@ public partial class PList : IDictionary<string, object>, IDictionary, IXmlSeria
             return true;
         }
 
-        value = new object();
+        value =
+#if NET5_0_OR_GREATER
+            default;
+#else
+            new object();
+#endif
         return false;
     }
 
