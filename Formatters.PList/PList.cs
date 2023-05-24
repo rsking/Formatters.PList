@@ -122,8 +122,8 @@ public partial class PList : IDictionary<string, object>, IDictionary, IXmlSeria
     /// <returns>The created <see cref="PList"/>.</returns>
     public static PList Create(string value)
     {
-        using var stream = XmlReader.Create(new StringReader(value), new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, IgnoreWhitespace = true });
-        return (PList)Serializer.Deserialize(stream)!;
+        using var reader = XmlReader.Create(new StringReader(value), new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, IgnoreWhitespace = true });
+        return (PList)Serializer.Deserialize(reader)!;
     }
 
     /// <summary>
