@@ -44,6 +44,32 @@ public partial class PList
 
         writer.WriteWhitespace(baseIndent);
         writer.WriteEndElement();
+
+        static string? CreateIndent(int level, string chars)
+        {
+            return level switch
+            {
+                < 0 => default,
+                0 => string.Empty,
+                1 => chars,
+                int l => CreateIndentCore(l, chars),
+            };
+
+            static string? CreateIndentCore(int level, string chars)
+            {
+                var charArray = new char[level * chars.Length];
+
+                for (var i = 0; i < level; i += chars.Length)
+                {
+                    for (var k = 0; k < chars.Length; k++)
+                    {
+                        charArray[i + k] = chars[k];
+                    }
+                }
+
+                return new string(charArray);
+            }
+        }
     }
 
     private static void WriteValue(XmlWriter writer, int indentLevel, string indentChars, object value)
@@ -96,32 +122,6 @@ public partial class PList
             }
 
             writer.WriteEndElement();
-        }
-    }
-
-    private static string? CreateIndent(int level, string chars)
-    {
-        return level switch
-        {
-            < 0 => default,
-            0 => string.Empty,
-            1 => chars,
-            int l => CreateIndentCore(l, chars),
-        };
-
-        static string? CreateIndentCore(int level, string chars)
-        {
-            var charArray = new char[level * chars.Length];
-
-            for (var i = 0; i < level; i+= chars.Length)
-            {
-                for (var k = 0; k < chars.Length; k++)
-                {
-                    charArray[i + k] = chars[k];
-                }
-            }
-
-            return new string(charArray);
         }
     }
 }

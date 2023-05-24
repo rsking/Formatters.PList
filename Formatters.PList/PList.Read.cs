@@ -43,9 +43,9 @@ public partial class PList
 
     private static IDictionary<string, object> ReadDictionary(XmlReader reader)
     {
-        IDictionary<string, object> dictionary = new Dictionary<string, object>(StringComparer.Ordinal);
-        string? key = null;
-        object? value = null;
+        var dictionary = new Dictionary<string, object>(StringComparer.Ordinal);
+        var key = default(string);
+        var value = default(object);
 
         while (ReadWhileWhiteSpace(reader))
         {
@@ -59,7 +59,7 @@ public partial class PList
                 _ = ReadWhileWhiteSpace(reader);
                 if (key is not null)
                 {
-                    AddToDictionary();
+                    AddToDictionary(dictionary, ref key, ref value);
                 }
 
                 key = reader.Value;
@@ -68,9 +68,9 @@ public partial class PList
             }
 
             value = ReadValue(reader);
-            AddToDictionary();
+            AddToDictionary(dictionary, ref key, ref value);
 
-            void AddToDictionary()
+            static void AddToDictionary(IDictionary<string, object> dictionary, ref string? key, ref object? value)
             {
                 dictionary.Add(key!, value!);
                 key = null;

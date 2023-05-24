@@ -240,8 +240,7 @@ public partial class PListBinaryFormatter
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static double ConvertToAppleTimeStamp(DateTime date)
         {
-            var diff = date - Origin;
-            return Math.Floor(diff.TotalSeconds);
+            return Math.Floor((date - Origin).TotalSeconds);
         }
     }
 
