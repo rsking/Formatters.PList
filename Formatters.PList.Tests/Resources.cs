@@ -21,18 +21,6 @@ internal static class Resources
         };
 
     /// <summary>
-    /// Gets the test binary.
-    /// </summary>
-    public static Stream TestBin => typeof(Resources).Assembly.GetManifestResourceStream(typeof(Resources).Namespace + ".testBin.plist")
-        ?? throw new InvalidOperationException();
-
-    /// <summary>
-    /// Gets the test XML.
-    /// </summary>
-    public static Stream TestXml => typeof(Resources).Assembly.GetManifestResourceStream(typeof(Resources).Namespace + ".testXml.plist")
-        ?? throw new InvalidOperationException();
-
-    /// <summary>
     /// The PList.
     /// </summary>
     public static readonly PList PList = new()
@@ -72,4 +60,16 @@ internal static class Resources
         { "testArrayLarge", Enumerable.Range(0, 18).ToList() },
         { "testString", "hello there" },
     };
+
+    /// <summary>
+    /// Gets the test binary.
+    /// </summary>
+    public static Stream TestBin => typeof(Resources).Assembly.GetManifestResourceStream(typeof(Resources).Namespace + ".testBin.plist")
+        ?? throw new InvalidOperationException();
+
+    /// <summary>
+    /// Gets the test XML.
+    /// </summary>
+    public static Stream TestXml => typeof(Resources).Assembly.GetManifestResourceStream(typeof(Resources).Namespace + ".testXml.plist")
+        ?? throw new InvalidOperationException();
 }

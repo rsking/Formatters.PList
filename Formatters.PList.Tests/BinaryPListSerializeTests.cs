@@ -55,7 +55,6 @@ public class BinaryPListSerializeTests
     [Fact]
     internal void TestOutput()
     {
-        //File.WriteAllBytes(@"C:\Users\rsking\Source\Repos\github\personal\rsking\Formatters.PList\Formatters.PList.Tests\outputBin.plist", this.bytes);
         using var stream = Resources.TestBin;
         using var memoryStream = new MemoryStream();
         stream.CopyTo(memoryStream);
