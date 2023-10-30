@@ -28,11 +28,7 @@ public partial class PList : System.Runtime.Serialization.ISerializable
                 bplist = (PList)formatter.Deserialize(memoryStream);
             }
 
-            // copy the values
-            foreach (var item in bplist)
-            {
-                this.Add(item);
-            }
+            this.DictionaryImplementation = bplist.DictionaryImplementation;
         }
     }
 

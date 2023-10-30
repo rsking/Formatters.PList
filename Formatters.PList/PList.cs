@@ -42,9 +42,7 @@ public partial class PList : IDictionary<string, object>, IDictionary, IXmlSeria
     /// <summary>
     /// Initializes a new instance of the <see cref="PList"/> class.
     /// </summary>
-    public PList()
-    {
-    }
+    public PList() => this.DictionaryImplementation = new Dictionary<string, object>(StringComparer.Ordinal);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PList"/> class.
@@ -80,10 +78,10 @@ public partial class PList : IDictionary<string, object>, IDictionary, IXmlSeria
     bool IDictionary.IsReadOnly => this.IsReadOnly;
 
     /// <inheritdoc />
-    ICollection IDictionary.Keys => (ICollection)this.Keys;
+    ICollection IDictionary.Keys => ((IDictionary)this.DictionaryImplementation).Keys;
 
     /// <inheritdoc />
-    ICollection IDictionary.Values => (ICollection)this.Values;
+    ICollection IDictionary.Values => ((IDictionary)this.DictionaryImplementation).Values;
 
     /// <inheritdoc />
     int ICollection.Count => this.Count;
@@ -97,7 +95,7 @@ public partial class PList : IDictionary<string, object>, IDictionary, IXmlSeria
     /// <summary>
     /// Gets the implementation.
     /// </summary>
-    protected IDictionary<string, object> DictionaryImplementation { get; private set; } = new Dictionary<string, object>(StringComparer.Ordinal);
+    protected IDictionary<string, object> DictionaryImplementation { get; private set; }
 
     private static XmlSerializer Serializer => serializer ??= new XmlSerializer(typeof(PList));
 
