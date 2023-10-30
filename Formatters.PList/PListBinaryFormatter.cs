@@ -13,7 +13,7 @@ using static System.Buffers.Binary.BinaryPrimitives;
 /// </summary>
 public partial class PListBinaryFormatter : System.Runtime.Serialization.IFormatter
 {
-    private static readonly DateTime Origin = new(2001, 1, 1, 0, 0, 0, 0);
+    private static readonly DateTime Origin = new(2001, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 
     /// <inheritdoc/>
     public System.Runtime.Serialization.SerializationBinder? Binder { get; set; }
