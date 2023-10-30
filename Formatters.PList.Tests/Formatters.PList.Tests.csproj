@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net7.0;net6.0;net472</TargetFrameworks>
-    <NoWarn>$(NoWarn);SA0001;SA1600</NoWarn>
+    <NoWarn>$(NoWarn);SA0001;SA1600;SYSLIB0011</NoWarn>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
