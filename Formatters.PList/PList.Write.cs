@@ -45,6 +45,7 @@ public partial class PList
         writer.WriteWhitespace(baseIndent);
         writer.WriteEndElement();
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S2589:Boolean expressions should not be gratuitous", Justification = "False positive")]
         static string? CreateIndent(int level, string chars)
         {
             return level switch
@@ -52,7 +53,7 @@ public partial class PList
                 < 0 => default,
                 0 => string.Empty,
                 1 => chars,
-                int l => CreateIndentCore(l, chars),
+                var l => CreateIndentCore(l, chars),
             };
 
             static string? CreateIndentCore(int level, string chars)
