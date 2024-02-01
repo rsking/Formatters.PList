@@ -12,10 +12,14 @@ public partial class PList
     /// <inheritdoc />
     public void WriteXml(XmlWriter writer)
     {
+#if NET6_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(writer);
+#else
         if (writer is null)
         {
             throw new ArgumentNullException(nameof(writer));
         }
+#endif
 
         writer.WriteAttributeString("version", "1.0");
         var indentLevel = writer.Settings?.Indent != false ? 0 : -1;

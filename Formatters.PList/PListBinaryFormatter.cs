@@ -27,10 +27,14 @@ public partial class PListBinaryFormatter : System.Runtime.Serialization.IFormat
     /// <inheritdoc/>
     public object Deserialize(Stream serializationStream)
     {
+#if NET6_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(serializationStream);
+#else
         if (serializationStream is null)
         {
             throw new ArgumentNullException(nameof(serializationStream));
         }
+#endif
 
         // see if this is a PList
         var header = serializationStream.Read(8);
@@ -73,10 +77,14 @@ public partial class PListBinaryFormatter : System.Runtime.Serialization.IFormat
     /// <inheritdoc/>
     public void Serialize(Stream serializationStream, object graph)
     {
+#if NET6_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(serializationStream);
+#else
         if (serializationStream is null)
         {
             throw new ArgumentNullException(nameof(serializationStream));
         }
+#endif
 
         var calculatedReferenceCount = CountReferences(graph);
 
