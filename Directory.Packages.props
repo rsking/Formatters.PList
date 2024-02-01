@@ -24,10 +24,10 @@
   </ItemGroup>
 
   <ItemGroup Label="Analyzers">
-    <GlobalPackageReference Include="Meziantou.Analyzer" Version="2.0.103" />
-    <GlobalPackageReference Include="Roslynator.Analyzers" Version="4.6.1" />
-    <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="9.12.0.78982" />
-    <GlobalPackageReference Include="StyleCop.Analyzers.Unstable" Version="1.2.0.507" />
+    <GlobalPackageReference Include="Meziantou.Analyzer" Version="2.0.139" />
+    <GlobalPackageReference Include="Roslynator.Analyzers" Version="4.10.0" />
+    <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="9.19.0.84025" />
+    <GlobalPackageReference Include="StyleCop.Analyzers.Unstable" Version="1.2.0.556" />
   </ItemGroup>
 
 </Project>

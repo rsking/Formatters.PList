@@ -34,7 +34,7 @@ public partial class PListBinaryFormatter
         };
     }
 
-    private static object ReadDictionary(Stream stream, IList<long> offsetTable, int index, int referenceSize)
+    private static Dictionary<string, object?> ReadDictionary(Stream stream, IList<long> offsetTable, int index, int referenceSize)
     {
         var buffer = new Dictionary<string, object?>(StringComparer.Ordinal);
         var referenceCount = GetCount(stream, offsetTable[index], out _);
@@ -63,7 +63,7 @@ public partial class PListBinaryFormatter
         return buffer;
     }
 
-    private static IList<object?> ReadArray(Stream stream, IList<long> offsetTable, int index, int referenceSize)
+    private static List<object?> ReadArray(Stream stream, IList<long> offsetTable, int index, int referenceSize)
     {
         var buffer = new List<object?>();
         var referenceCount = GetCount(stream, offsetTable[index], out _);

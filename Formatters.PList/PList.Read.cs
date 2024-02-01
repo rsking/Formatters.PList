@@ -41,7 +41,7 @@ public partial class PList
         throw new ArgumentException(Properties.Resources.InvalidXml, nameof(reader));
     }
 
-    private static IDictionary<string, object> ReadDictionary(XmlReader reader)
+    private static Dictionary<string, object> ReadDictionary(XmlReader reader)
     {
         var dictionary = new Dictionary<string, object>(StringComparer.Ordinal);
         var key = default(string);
@@ -159,7 +159,7 @@ public partial class PList
                 list.Add(ReadValue(reader));
             }
 
-            return list.ToArray();
+            return [.. list];
         }
 
         static byte[] ReadData(XmlReader reader)

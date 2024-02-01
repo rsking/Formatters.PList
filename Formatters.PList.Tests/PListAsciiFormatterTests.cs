@@ -6,7 +6,7 @@ namespace Formatters.PList.Tests;
 
 public class PListAsciiFormatterTests
 {
-    private readonly System.Runtime.Serialization.IFormatter formatter = new PListAsciiFormatter();
+    private readonly PListAsciiFormatter formatter = new();
 
     [Fact]
     public void NoBinder() => this.formatter.Binder.Should().BeNull();

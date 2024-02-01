@@ -19,16 +19,23 @@ public partial class PList : System.Runtime.Serialization.ISerializable
     /// <param name="streamingContext">The streaming context.</param>
     protected PList(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext)
     {
-        if (serializationInfo.GetValue(PListBinaryField, typeof(byte[])) is byte[] bytes)
+        this.DictionaryImplementation = GetSerializedPList(serializationInfo, streamingContext) ?? new Dictionary<string, object>(StringComparer.Ordinal);
+
+        static IDictionary<string, object>? GetSerializedPList(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext)
         {
-            PList bplist;
-            using (var memoryStream = new MemoryStream(bytes!))
+            if (serializationInfo.GetValue(PListBinaryField, typeof(byte[])) is byte[] bytes)
             {
-                var formatter = new PListBinaryFormatter { Context = streamingContext };
-                bplist = (PList)formatter.Deserialize(memoryStream);
+                PList bplist;
+                using (var memoryStream = new MemoryStream(bytes!))
+                {
+                    var formatter = new PListBinaryFormatter { Context = streamingContext };
+                    bplist = (PList)formatter.Deserialize(memoryStream);
+                }
+
+                return bplist.DictionaryImplementation;
             }
 
-            this.DictionaryImplementation = bplist.DictionaryImplementation;
+            return default;
         }
     }
 
