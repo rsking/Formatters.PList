@@ -39,6 +39,8 @@ public partial class PList : IDictionary<string, object>, IDictionary, IXmlSeria
 
     private static XmlSerializer? serializer;
 
+    private static XmlReaderSettings? readerSettings;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="PList"/> class.
     /// </summary>
@@ -97,7 +99,9 @@ public partial class PList : IDictionary<string, object>, IDictionary, IXmlSeria
     /// </summary>
     protected IDictionary<string, object> DictionaryImplementation { get; private set; }
 
-    private static XmlSerializer Serializer => serializer ??= new XmlSerializer(typeof(PList));
+    private static XmlSerializer Serializer => serializer ??= new(typeof(PList));
+
+    private static XmlReaderSettings ReaderSettings => readerSettings ??= new() { DtdProcessing = DtdProcessing.Ignore, IgnoreWhitespace = true };
 
     /// <inheritdoc />
     public object this[string key]
@@ -120,7 +124,7 @@ public partial class PList : IDictionary<string, object>, IDictionary, IXmlSeria
     /// <returns>The created <see cref="PList"/>.</returns>
     public static PList Create(string value)
     {
-        using var reader = XmlReader.Create(new StringReader(value), new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, IgnoreWhitespace = true });
+        using var reader = XmlReader.Create(new StringReader(value), ReaderSettings);
         return (PList)Serializer.Deserialize(reader)!;
     }
 
@@ -132,7 +136,7 @@ public partial class PList : IDictionary<string, object>, IDictionary, IXmlSeria
     public static PList Create(Stream stream)
     {
         using var streamReader = new StreamReader(stream, System.Text.Encoding.UTF8, detectEncodingFromByteOrderMarks: true, 1024, leaveOpen: true);
-        using var reader = XmlReader.Create(streamReader, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, IgnoreWhitespace = true });
+        using var reader = XmlReader.Create(streamReader, ReaderSettings);
         return (PList)Serializer.Deserialize(reader)!;
     }
 
