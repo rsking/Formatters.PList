@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0;net472</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0;net472</TargetFrameworks>
     <NoWarn>$(NoWarn);SA0001;SA1600;SYSLIB0011</NoWarn>
+    <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>

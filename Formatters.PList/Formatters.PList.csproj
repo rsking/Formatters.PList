@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Authors>Ross King</Authors>
     <Description>PList formatters based on IFormatter and IXmlSerializable</Description>
@@ -9,6 +9,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/rsking/Formatters.PList</PackageProjectUrl>
     <AllowUnsafeBlocks Condition=" ($([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard') or ($([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETCoreApp' and $([MSBuild]::VersionLessThan($([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')), '6.0'))) ">true</AllowUnsafeBlocks>
+    <NoWarn Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">$(NoWarn);SYSLIB0011;SYSLIB0050</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -45,7 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.XmlSerializer.Generator" Version="7.0.0" />
+    <DotNetCliToolReference Include="Microsoft.XmlSerializer.Generator" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

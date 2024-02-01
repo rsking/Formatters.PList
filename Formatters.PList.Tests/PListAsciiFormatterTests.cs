@@ -17,7 +17,6 @@ public class PListAsciiFormatterTests
     [Fact]
     public void NoSurrogateSelector() => this.formatter.SurrogateSelector.Should().BeNull();
 
-#pragma warning disable SYSLIB0011 // Type or member is obsolete
     [Fact]
     public void Deserialise()
     {
@@ -25,5 +24,4 @@ public class PListAsciiFormatterTests
         var fromStream = this.formatter.Deserialize(Resources.TestXml);
         fromStream.Should().BeOfType<PList>().Which.Should().BeEquivalentTo(fromString);
     }
-#pragma warning restore SYSLIB0011 // Type or member is obsolete
 }
