@@ -23,8 +23,13 @@ public class XmlPListSerializeTests
         { "testString", "hello there" },
     };
 
+    private readonly PList plistWithAmpersand = new PList()
+    {
+        { "stringAmpersand", "Test value & second value" }
+    };
+
     [Fact]
-    internal void TestOutput()
+    public void TestOutput()
     {
         var serialized = Serialize(this.plist);
         var resource = FromResource();
@@ -66,9 +71,26 @@ public class XmlPListSerializeTests
     }
 
     [Fact]
-    internal void NullXmlWriter()
+    public void NullXmlWriter()
     {
         var action = () => new PList().WriteXml(null!);
         action.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void StringWithAmpersand()
+    {
+        var xml = Serialize(this.plistWithAmpersand);
+        xml.Should().NotContain(" & ");
+
+        static string Serialize(PList plist)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(PList));
+                serializer.Serialize(memoryStream, plist);
+                return System.Text.Encoding.UTF8.GetString(memoryStream.ToArray());
+            }
+        }
     }
 }
