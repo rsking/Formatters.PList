@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageVersion Include="PolySharp" Version="1.14.1" />
-    <PackageVersion Include="Microsoft.XmlSerializer.Generator" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.XmlSerializer.Generator" Version="$(VerMicrosoft_XmlSerializer_Generator)" />
     <PackageVersion Include="System.Memory" Version="4.5.0" />
   </ItemGroup>
 

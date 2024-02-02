@@ -23,9 +23,9 @@ public class XmlPListSerializeTests
         { "testString", "hello there" },
     };
 
-    private readonly PList plistWithAmpersand = new PList()
+    private readonly PList plistWithAmpersand = new()
     {
-        { "stringAmpersand", "Test value & second value" }
+        { "stringAmpersand", "Test value & second value" },
     };
 
     [Fact]

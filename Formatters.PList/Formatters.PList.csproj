@@ -12,6 +12,12 @@
     <NoWarn Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">$(NoWarn);SYSLIB0011;SYSLIB0050</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <DebugSymbols>true</DebugSymbols>
+    <_IncludePdb>true</_IncludePdb>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Update="PListBinaryFormatter.*.cs" DependentUpon="PListBinaryFormatter.cs" />
     <Compile Update="PList.*.cs" DependentUpon="PList.cs" />
@@ -22,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" $([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard' and $([MSBuild]::VersionLessThan($([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')), '2.1')) ">
-    <PackageReference Include="PolySharp" />
+    <PackageReference Include="PolySharp" PrivateAssets="all" />
     <PackageReference Include="System.Memory" />
   </ItemGroup>
 
@@ -42,11 +48,30 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.XmlSerializer.Generator" />
+    <PackageReference Include="Microsoft.XmlSerializer.Generator" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.XmlSerializer.Generator" Version="8.0.0" />
+    <DotNetCliToolReference Include="Microsoft.XmlSerializer.Generator" Version="$(VerMicrosoft_XmlSerializer_Generator)" />
   </ItemGroup>
+
+  <Target Name="_CopySerializationPdb" AfterTargets="GenerateSerializationAssembly" Condition="Exists('$(_SerializerPdbIntermediateFolder)') == 'true'">
+    <Copy Condition="Exists('$(_SerializerDllIntermediateFolder)') == 'true'" SourceFiles="$(_SerializerPdbIntermediateFolder)" DestinationFolder="$(OutputPath)" />
+  </Target>
+
+  <Target Name="_PackSerializationPdb" BeforeTargets="_GetPackageFiles" Condition=" '$(_IncludePdb)' == 'true' ">
+
+    <PropertyGroup>
+      <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_BuildOutputInPackage Include="$(ProjectDir)$(OutputPath)%(_TargetFrameworks.Identity)\$(AssemblyName).XmlSerializers.pdb" Condition="Exists('$(ProjectDir)$(OutputPath)%(_TargetFrameworks.Identity)\$(AssemblyName).XmlSerializers.pdb')">
+        <TargetFramework>%(_TargetFrameworks.Identity)</TargetFramework>
+        <FinalOutputPath>$(ProjectDir)$(OutputPath)%(_TargetFrameworks.Identity)\$(AssemblyName).XmlSerializers.pdb</FinalOutputPath>
+      </_BuildOutputInPackage>
+    </ItemGroup>
+
+  </Target>
 
 </Project>
