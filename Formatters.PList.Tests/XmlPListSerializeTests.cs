@@ -4,10 +4,10 @@
 
 namespace Formatters.PList.Tests;
 
-using System.Text;
-
 public class XmlPListSerializeTests
 {
+    private static readonly System.Xml.Serialization.XmlSerializer Serializer = new(typeof(PList));
+
     private readonly PList plist = new()
     {
         { "testArray", new object[] { 34, "string item in array" } },
@@ -41,7 +41,7 @@ public class XmlPListSerializeTests
             using var memoryStream = new MemoryStream();
             var formatter = new PListAsciiFormatter();
             formatter.Serialize(memoryStream, value);
-            return Sanitize(Encoding.UTF8.GetString(memoryStream.ToArray()));
+            return Sanitize(System.Text.Encoding.UTF8.GetString(memoryStream.ToArray()));
         }
 
         static System.Xml.Linq.XDocument FromResource()
@@ -49,13 +49,13 @@ public class XmlPListSerializeTests
             using var stream = Resources.TestXml;
             using var memoryStream = new MemoryStream();
             stream.CopyTo(memoryStream);
-            return Sanitize(Encoding.UTF8.GetString(memoryStream.ToArray()));
+            return Sanitize(System.Text.Encoding.UTF8.GetString(memoryStream.ToArray()));
         }
 
         static System.Xml.Linq.XDocument Sanitize(string input)
         {
             System.Xml.Linq.XDocument document;
-            using (var inputStream = new MemoryStream(Encoding.UTF8.GetBytes(input)))
+            using (var inputStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(input)))
             {
                 document = System.Xml.Linq.XDocument.Load(inputStream);
             }
@@ -85,12 +85,9 @@ public class XmlPListSerializeTests
 
         static string Serialize(PList plist)
         {
-            using (var memoryStream = new MemoryStream())
-            {
-                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(PList));
-                serializer.Serialize(memoryStream, plist);
-                return System.Text.Encoding.UTF8.GetString(memoryStream.ToArray());
-            }
+            using var memoryStream = new MemoryStream();
+            Serializer.Serialize(memoryStream, plist);
+            return System.Text.Encoding.UTF8.GetString(memoryStream.ToArray());
         }
     }
 }

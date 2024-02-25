@@ -18,10 +18,5 @@ public class PListAsciiFormatterTests
     public void NoSurrogateSelector() => this.formatter.SurrogateSelector.Should().BeNull();
 
     [Fact]
-    public void Deserialise()
-    {
-        var fromString = XmlPListDeserializeTests.GetPList();
-        var fromStream = this.formatter.Deserialize(Resources.TestXml);
-        fromStream.Should().BeOfType<PList>().Which.Should().BeEquivalentTo(fromString);
-    }
+    public void Deserialise() => XmlPListDeserializeTests.GetPList().Should().BeOfType<PList>().Which.Should().BeEquivalentTo(this.formatter.Deserialize(Resources.TestXml));
 }

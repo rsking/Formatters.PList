@@ -95,7 +95,7 @@ public partial class PListBinaryFormatter : System.Runtime.Serialization.IFormat
         Write(serializationStream, "bplist00", head: false);
 
         var offsetTable = new List<long> { serializationStream.Position };
-        Write(serializationStream, offsetTable, new List<object?>() { null }, referenceSize, graph);
+        Write(serializationStream, offsetTable, [null], referenceSize, graph);
 
         var offsetTableOffset = serializationStream.Length;
         var offsetByteSize = GetByteCount(offsetTable[^1]);
