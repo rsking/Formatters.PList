@@ -25,14 +25,16 @@ public partial class PList : System.Runtime.Serialization.ISerializable
         {
             if (serializationInfo.GetValue(PListBinaryField, typeof(byte[])) is byte[] bytes)
             {
-                PList bplist;
-                using (var memoryStream = new MemoryStream(bytes!))
-                {
-                    var formatter = new PListBinaryFormatter { Context = streamingContext };
-                    bplist = (PList)formatter.Deserialize(memoryStream);
-                }
+                return GetSerializedPList(bytes);
 
-                return bplist.DictionaryImplementation;
+                IDictionary<string, object>? GetSerializedPList(byte[] bytes)
+                {
+                    using var memoryStream = new MemoryStream(bytes!);
+                    var formatter = new PListBinaryFormatter { Context = streamingContext };
+                    return formatter.Deserialize(memoryStream) is PList list
+                        ? list.DictionaryImplementation
+                        : default;
+                }
             }
 
             return default;
